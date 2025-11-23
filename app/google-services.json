@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "204647425745",
+    "project_id": "marketduoc-yc",
+    "storage_bucket": "marketduoc-yc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:204647425745:android:f031e6e4297e65401f07f0",
+        "android_client_info": {
+          "package_name": "com.example.marketduoc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDe0FCw8nuDDG0KL2PPbD5QLYBL_fXwEv0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
