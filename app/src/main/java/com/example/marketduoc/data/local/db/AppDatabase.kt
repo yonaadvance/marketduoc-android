@@ -8,32 +8,29 @@ import com.example.marketduoc.data.local.dao.ArticuloDao
 import com.example.marketduoc.data.model.Articulo
 
 @Database(
-    entities = [Articulo::class], // aqui creo la tabla
-    version = 1, // version de la bd
-    exportSchema = false // adve de room
+    entities = [Articulo::class],
+    version = 3, // <--- VERSIÓN 3
+    exportSchema = false
 )
-abstract class AppDatabase : RoomDatabase() { //abst xke room escri el cod
-
-    // Función abstracta para tu DAO
+abstract class AppDatabase : RoomDatabase() {
     abstract fun articuloDao(): ArticuloDao
 
-    // ejemplo SQLite patr singlet
     companion object {
         @Volatile
-        private var INSTANCE: AppDatabase? = null //misma para todos los hilos
+        private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(context: Context): AppDatabase {  //se obtiene la bd
+        fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "marketduoc_db" // como se constru la bd
-                ).build()
-                INSTANCE = instance // guardo la ins de la bd pa no crear denvo
+                    "marketduoc_db"
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                INSTANCE = instance
                 instance
             }
         }
     }
 }
-
-//asi solo existe una instancia en la bd de la app y asi no se pega
