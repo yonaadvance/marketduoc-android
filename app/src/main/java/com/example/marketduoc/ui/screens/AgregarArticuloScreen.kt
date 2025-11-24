@@ -49,6 +49,8 @@ fun AgregarArticuloScreen(
     var descripcion by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
     var capturedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Manejo de permisos de cámara
     var hasPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -56,6 +58,7 @@ fun AgregarArticuloScreen(
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
+
     var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -91,8 +94,10 @@ fun AgregarArticuloScreen(
         ) {
             if (hasPermission) {
                 if (capturedImageUri == null) {
+                    // --- MODO CÁMARA (PREVISUALIZACIÓN) ---
                     Text("1. Tomar Foto", style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
+
                     Box(modifier = Modifier.fillMaxWidth().aspectRatio(3f / 4f)) {
                         SimpleCameraPreview(
                             modifier = Modifier.fillMaxSize(),
@@ -100,6 +105,7 @@ fun AgregarArticuloScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
+
                     Button(
                         onClick = {
                             val imgCap = imageCapture
@@ -113,9 +119,10 @@ fun AgregarArticuloScreen(
                         Text("Tomar Foto")
                     }
                 } else {
-                    // --- MODO FOTO TOMADA ---
+                    // --- MODO FORMULARIO (FOTO TOMADA) ---
                     Text("2. Completar Datos", style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
+
                     AsyncImage(
                         model = capturedImageUri,
                         contentDescription = "Foto capturada",
@@ -150,24 +157,29 @@ fun AgregarArticuloScreen(
                     Button(
                         enabled = titulo.isNotBlank() && descripcion.isNotBlank() && precio.isNotBlank(),
                         onClick = {
+                            // AQUI ESTÁ EL CAMBIO IMPORTANTE:
+                            // Pasamos 'context' como primer parámetro
                             articuloViewModel.insertarArticulo(
+                                context = context,
                                 titulo = titulo,
                                 descripcion = descripcion,
                                 precio = precio,
                                 fotoUri = capturedImageUri!!
                             )
-                            Toast.makeText(context, "Artículo guardado", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Enviando producto...", Toast.LENGTH_SHORT).show()
                             onNavigateBack()
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Publicar Artículo")
                     }
+
                     TextButton(onClick = { capturedImageUri = null }) {
                         Text("Tomar Otra Foto")
                     }
                 }
             } else {
+                // --- MODO SIN PERMISOS ---
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
@@ -183,6 +195,8 @@ fun AgregarArticuloScreen(
         }
     }
 }
+
+// --- FUNCIONES DE UTILIDAD DE CÁMARA (SIN CAMBIOS) ---
 
 @Composable
 private fun SimpleCameraPreview(
