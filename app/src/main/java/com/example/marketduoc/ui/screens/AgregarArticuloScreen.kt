@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,8 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
+import com.example.marketduoc.data.model.Articulo
+import com.example.marketduoc.utils.ImageUtils
 import com.example.marketduoc.viewmodel.ArticuloViewModel
-import com.google.common.util.concurrent.ListenableFuture
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -130,7 +130,22 @@ fun AgregarArticuloScreen(
                     Button(
                         enabled = titulo.isNotBlank() && precio.isNotBlank(),
                         onClick = {
-                            articuloViewModel.insertarArticulo(context, titulo, descripcion, precio, capturedImageUri!!, selectedCategory)
+                            // --- AQUÍ ESTÁ EL ARREGLO ---
+                            // 1. Convertimos la URI a String Base64 para enviarla
+                            val fotoBase64 = if (capturedImageUri != null) ImageUtils.uriToBase64(context, capturedImageUri!!) else ""
+
+                            // 2. Creamos el objeto Articulo
+                            val nuevoArticulo = Articulo(
+                                titulo = titulo,
+                                descripcion = descripcion,
+                                precio = precio.toDoubleOrNull() ?: 0.0,
+                                fotoUri = fotoBase64,
+                                categoriaId = selectedCategory
+                            )
+
+                            // 3. Llamamos a la función correcta del ViewModel
+                            articuloViewModel.agregarArticulo(nuevoArticulo)
+
                             Toast.makeText(context, "Publicando...", Toast.LENGTH_SHORT).show()
                             onNavigateBack()
                         },

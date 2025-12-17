@@ -1,5 +1,6 @@
 package com.example.marketduoc.ui.screens
 
+import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -8,8 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -96,7 +97,10 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(listaFiltrada) { articulo ->
-                        ArticuloItem(articulo)
+                        // Aquí conectamos el botón de borrar con el ViewModel
+                        ArticuloItem(articulo, onDelete = {
+                            articuloViewModel.eliminarArticulo(articulo)
+                        })
                     }
                 }
             }
@@ -105,7 +109,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun ArticuloItem(articulo: Articulo) {
+fun ArticuloItem(articulo: Articulo, onDelete: () -> Unit) {
     val context = LocalContext.current
     val bitmap = remember(articulo.fotoUri) {
         if (articulo.fotoUri.length > 200) ImageUtils.base64ToBitmap(articulo.fotoUri) else null
@@ -116,54 +120,85 @@ fun ArticuloItem(articulo: Articulo) {
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
     ) {
-        Column {
-            if (bitmap != null) {
-                Image(
-                    bitmap = bitmap.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxWidth().height(200.dp),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                AsyncImage(
-                    model = Uri.parse(articulo.fotoUri),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxWidth().height(200.dp),
-                    contentScale = ContentScale.Crop
-                )
+        Box {
+            Column {
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxWidth().height(200.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    AsyncImage(
+                        model = Uri.parse(articulo.fotoUri),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxWidth().height(200.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(articulo.titulo, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text(
+                            "$ ${articulo.precio.toInt()}",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
+                        Icon(Icons.Default.Person, null, modifier = Modifier.size(16.dp), tint = Color.Gray)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            if (articulo.emailVendedor.isNotEmpty()) articulo.emailVendedor else "Desconocido",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.Gray
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(articulo.descripcion, style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // BOTÓN CONTACTAR
+                    Button(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                data = Uri.parse("mailto:")
+                                putExtra(Intent.EXTRA_EMAIL, arrayOf(articulo.emailVendedor))
+                                putExtra(Intent.EXTRA_SUBJECT, "Consulta por: ${articulo.titulo}")
+                                putExtra(Intent.EXTRA_TEXT, "Hola, vi tu producto '${articulo.titulo}' en MarketDuoc y me interesa...")
+                            }
+                            try {
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "No tienes app de correo instalada", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                    ) {
+                        Text("Contactar Vendedor")
+                    }
+                }
             }
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(articulo.titulo, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text(
-                        "$ ${articulo.precio.toInt()}",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-                    Icon(Icons.Default.Person, null, modifier = Modifier.size(16.dp), tint = Color.Gray)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        if (articulo.emailVendedor.isNotEmpty()) articulo.emailVendedor else "Desconocido",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Color.Gray
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(articulo.descripcion, style = MaterialTheme.typography.bodyMedium)
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = { Toast.makeText(context, "Contactando a ${articulo.emailVendedor}...", Toast.LENGTH_SHORT).show() },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
-                ) {
-                    Text("Contactar Vendedor")
-                }
+
+            // --- BOTÓN DE BORRAR (PAPELERA ROJA) ---
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier
+                    .align(Alignment.TopEnd) // Se coloca arriba a la derecha
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Borrar",
+                    tint = Color.Red,
+                    modifier = Modifier.size(32.dp)
+                )
             }
         }
     }

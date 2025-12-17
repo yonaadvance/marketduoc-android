@@ -1,20 +1,15 @@
 package com.example.marketduoc.viewmodel
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.marketduoc.data.local.dao.ArticuloDao
 
-
-class ArticuloViewModelFactory(private val dao: ArticuloDao) : ViewModelProvider.Factory {
-
+class ArticuloViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-
         if (modelClass.isAssignableFrom(ArticuloViewModel::class.java)) {
-
             @Suppress("UNCHECKED_CAST")
-            return ArticuloViewModel(dao) as T
+            return ArticuloViewModel(application) as T
         }
-
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

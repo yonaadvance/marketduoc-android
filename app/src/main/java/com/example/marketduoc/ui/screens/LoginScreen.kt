@@ -1,5 +1,6 @@
 package com.example.marketduoc.ui.screens
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -96,6 +97,15 @@ fun LoginScreen(
             onClick = {
                 loginViewModel.iniciarSesion(email, password) { exito ->
                     if (exito) {
+                        // --- AQUÍ ESTÁ LA LÓGICA DE VERDAD ---
+                        // Guardamos el correo en la memoria del teléfono (SharedPreferences)
+                        val sharedPref = context.getSharedPreferences("MarketDuocPrefs", Context.MODE_PRIVATE)
+                        with (sharedPref.edit()) {
+                            putString("email_usuario", email) // Guardamos lo que escribiste en la cajita
+                            apply() // Confirmamos el guardado
+                        }
+                        // -------------------------------------
+
                         onLoginExitoso()
                     } else {
                         Toast.makeText(context, "Error: Credenciales incorrectas", Toast.LENGTH_SHORT).show()
