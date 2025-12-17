@@ -57,8 +57,7 @@ fun HomeScreen(
                     ),
                     actions = {
                         TextButton(onClick = onCerrarSesion) {
-                            Icon(Icons.AutoMirrored.Filled.ExitToApp, null, tint = MaterialTheme.colorScheme.onPrimary)
-                            Text("Salir", color = MaterialTheme.colorScheme.onPrimary)
+                            Text("Cerrar Sesión", color = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
                 )

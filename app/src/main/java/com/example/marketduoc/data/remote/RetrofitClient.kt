@@ -7,7 +7,8 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
     // Tu URL de Ngrok (verifica que siga siendo la misma)
-    private const val BASE_URL = "https://unexasperating-contractive-toshia.ngrok-free.dev/api/v1/"
+    // URL oficial de Render
+    private const val BASE_URL = "https://backend-marketduoc.onrender.com/api/v1/"
 
     // --- CONFIGURACIÓN DE PACIENCIA ---
     private val client = OkHttpClient.Builder()
